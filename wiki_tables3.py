@@ -14,6 +14,10 @@ def steal_tables(url):
         for row in rows:
             s_row = []
             for cell in row.find_all(['td', 'th']):
+                try:
+                    cell.sup.decompose()
+                except Exception:
+                    pass
                 s_cell = cell.get_text()
                 s_row.append(s_cell)
             s_table.append(s_row)
