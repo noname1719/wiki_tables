@@ -28,9 +28,15 @@ def steal_tables(url):
     return s_tables
 
 
-
 def joining_tables(tables):
-    pass
+    tables = sorted(tables, reverse=True)
+    for row_0 in tables[0]:
+        for row_1 in tables[1]:
+            if row_0[0] == row_1[0]:
+                del row_1[0]
+                row_0.extend(row_1)
+
+    return tables[0]
 
 
 def show_result(table):
