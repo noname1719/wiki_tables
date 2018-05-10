@@ -1,6 +1,10 @@
 import csv
+import re
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+
+
+html = "https://en.wikipedia.org/wiki/List_of_Unified_Modeling_Language_tools"
 
 
 def steal_tables(url):
@@ -20,7 +24,6 @@ def steal_tables(url):
                     cell.sup.decompose()
                 except AttributeError:
                     pass
-
                 s_cell = cell.get_text()
                 s_row.append(s_cell)
             s_table.append(s_row)
@@ -28,31 +31,38 @@ def steal_tables(url):
     return s_tables
 
 
+def get_keys(tables):
+    fin_table = set()
+    keys = []
+    for table in tables:
+        for row in table:
+            fin_table.add(str.lower(row[0]))
+    for key in fin_table:
+        i = [key]
+        keys.append(i)
+    return keys
+
+
 def joining_tables(tables):
-    tables = sorted(tables, reverse=True)
-    for row_0 in tables[0]:
-        for row_1 in tables[1]:
-            if row_0[0] == row_1[0]:
-                del row_1[0]
-                row_0.extend(row_1)
-
-    return tables[0]
-
-
-def show_result(table):
-    pass
-
-
-def main():
-    print('enter url')
-    url = input()
-    print('stealing tables')
-    tables = steal_tables(url)
-    print('joining tables')
-    table = joining_tables(tables)
-    print('complete')
-    show_result(table)
+    keys = get_keys(tables)
+    for table in tables:
+        keys_len = len(keys[0])
+        table_len = len(table[0]) - 1
+        fin_len = keys_len + table_len
+        for key in keys:
+            for row in table:
+                if key[0] == str.lower(row[0]):
+                    key.extend(row[1:])
+            if len(key) < fin_len:
+                for i in range(table_len - 1):
+                    key.extend(' ')
+    return keys
 
 
-if __name__ == "__main__":
-    main()
+
+
+tables = steal_tables(html)
+
+fin = joining_tables(tables)
+for i in fin:
+    print(i)
