@@ -60,8 +60,7 @@ tables = steal_tables(html)
 
 table = joining_tables(tables)
 
-outfile = open('table.csv', 'w', encoding='utf-8')
-writer = csv.writer(outfile)
-for row in table:
-    writer.writerow(row)
-outfile.close()
+with open('table.csv', 'w', encoding='utf-8') as outfile:
+    writer = csv.writer(outfile)
+    for row in table:
+        writer.writerow(row)
