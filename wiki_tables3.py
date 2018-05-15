@@ -1,6 +1,10 @@
 import csv
+import re
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+
+
+html = "https://en.wikipedia.org/wiki/List_of_Unified_Modeling_Language_tools"
 
 
 def steal_tables(url):
@@ -20,7 +24,6 @@ def steal_tables(url):
                     cell.sup.decompose()
                 except AttributeError:
                     pass
-
                 s_cell = cell.get_text()
                 s_row.append(s_cell)
             s_table.append(s_row)
@@ -28,31 +31,37 @@ def steal_tables(url):
     return s_tables
 
 
+def get_keys(table):
+    keys = set()
+    for key in table:
+        keys.add(str.lower(key[0]))
+    return keys
+
+
 def joining_tables(tables):
-    tables = sorted(tables, reverse=True)
-    for row_0 in tables[0]:
-        for row_1 in tables[1]:
-            if row_0[0] == row_1[0]:
-                del row_1[0]
-                row_0.extend(row_1)
+    fin_table = []
+    all_keys = set()
+    for table in tables:
+        all_keys.update(get_keys(table))
+    for key in all_keys:
+        fin_table.append([key])
+    for table in tables:
+        table_len = len(table[0])-1
+        not_in_table = all_keys.difference(get_keys(table))
+        for row in fin_table:
+            if row[0] in not_in_table:
+                row.extend([None]*table_len)
+            for item in table:
+                if str.lower(item[0]) == row[0]:
+                    row.extend(item[1:])
+    return fin_table
 
-    return tables[0]
+tables = steal_tables(html)
 
+table = joining_tables(tables)
 
-def show_result(table):
-    pass
-
-
-def main():
-    print('enter url')
-    url = input()
-    print('stealing tables')
-    tables = steal_tables(url)
-    print('joining tables')
-    table = joining_tables(tables)
-    print('complete')
-    show_result(table)
-
-
-if __name__ == "__main__":
-    main()
+outfile = open('table.csv', 'w', encoding='utf-8')
+writer = csv.writer(outfile)
+for row in table:
+    writer.writerow(row)
+outfile.close()
